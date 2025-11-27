@@ -285,15 +285,8 @@ export default function RestaurantManagementPage() {
                     <CardContent>
                       <div className="space-y-2">
                         {categoryDishes.map((dish) => (
-                          <div key={dish.id} className="flex items-center justify-between border-b pb-2">
+                          <div key={dish.id} className="border-b pb-2">
                             <span className="text-sm">{dish.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openEditDishDialog(dish)}
-                            >
-                              Edit
-                            </Button>
                           </div>
                         ))}
                       </div>
@@ -467,7 +460,7 @@ export default function RestaurantManagementPage() {
               </DialogContent>
             </Dialog>
 
-            <div className="space-y-6">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {restaurant.dishes.map((dish) => (
                 <Card key={dish.id}>
                   <CardContent className="p-4">

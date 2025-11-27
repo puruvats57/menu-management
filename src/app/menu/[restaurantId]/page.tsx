@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import QRCode from "qrcode";
 
@@ -11,6 +12,7 @@ export default function MenuPage() {
   const params = useParams();
   const restaurantId = params.restaurantId as string;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentCategoryName, setCurrentCategoryName] = useState<string>("");
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
@@ -22,7 +24,9 @@ export default function MenuPage() {
 
   useEffect(() => {
     if (menu && menu.categories.length > 0 && !selectedCategory) {
-      setSelectedCategory(menu.categories[0]?.id ?? null);
+      const firstCategory = menu.categories[0];
+      setSelectedCategory(firstCategory?.id ?? null);
+      setCurrentCategoryName(firstCategory?.name ?? "");
     }
   }, [menu, selectedCategory]);
 
@@ -43,22 +47,26 @@ export default function MenuPage() {
   const scrollToCategory = (categoryId: string) => {
     const element = categoryRefs.current[categoryId];
     if (element) {
-      const headerHeight = 140; // Approximate height of fixed headers
+      const headerHeight = 200; // Height of fixed headers (restaurant header + tabs + category name)
       const elementPosition = element.offsetTop - headerHeight;
       window.scrollTo({
         top: elementPosition,
         behavior: "smooth",
       });
       setSelectedCategory(categoryId);
+      const category = menu?.categories.find((c) => c.id === categoryId);
+      if (category) {
+        setCurrentCategoryName(category.name);
+      }
     }
   };
 
-  // Track scroll position to update selected category
+  // Track scroll position to update selected category and current category name
   useEffect(() => {
     const handleScroll = () => {
       if (!menu) return;
 
-      const headerHeight = 140;
+      const headerHeight = 200; // Height of fixed headers
       const scrollPosition = window.scrollY + headerHeight + 50;
 
       for (const category of menu.categories) {
@@ -69,6 +77,7 @@ export default function MenuPage() {
 
           if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
             setSelectedCategory(category.id);
+            setCurrentCategoryName(category.name);
             break;
           }
         }
@@ -134,6 +143,15 @@ export default function MenuPage() {
         </div>
       </div>
 
+      {/* Current Category Name - Fixed while scrolling */}
+      {currentCategoryName && (
+        <div className="sticky top-[133px] z-10 bg-white border-b shadow-sm">
+          <div className="container mx-auto px-4 py-3">
+            <h2 className="text-xl font-bold">{currentCategoryName}</h2>
+          </div>
+        </div>
+      )}
+
       {/* Menu Items */}
       <div className="container mx-auto px-4 py-6">
         {allCategories.map((category) => {
@@ -148,45 +166,51 @@ export default function MenuPage() {
               }}
               className="mb-8"
             >
-              {/* Category Header */}
-              <h2 className="mb-4 text-xl font-bold">{category.name}</h2>
+              {/* Category Header - Hidden as it's now shown in sticky header */}
+              <div className="mb-4 h-0 invisible">
+                <h2 className="text-xl font-bold">{category.name}</h2>
+              </div>
 
               {/* Dishes */}
-              <div className="space-y-6">
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 {dishes.map((dish) => (
-                  <div key={dish.id} className="flex gap-4">
-                    <div className="flex-1">
-                      <div className="mb-2 flex items-center gap-2">
-                        {/* Dietary indicator - simplified for now */}
-                        <span className="h-3 w-3 rounded-full bg-green-500"></span>
-                        {dish.spiceLevel !== null &&
-                          dish.spiceLevel !== undefined &&
-                          Array.from({ length: dish.spiceLevel }).map((_, i) => (
-                            <span key={i} className="text-red-500">
-                              🌶️
-                            </span>
-                          ))}
+                  <Card key={dish.id}>
+                    <CardContent className="p-4">
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <div className="mb-2 flex items-center gap-2">
+                            {/* Dietary indicator - simplified for now */}
+                            <span className="h-3 w-3 rounded-full bg-green-500"></span>
+                            {dish.spiceLevel !== null &&
+                              dish.spiceLevel !== undefined &&
+                              Array.from({ length: dish.spiceLevel }).map((_, i) => (
+                                <span key={i} className="text-red-500">
+                                  🌶️
+                                </span>
+                              ))}
+                          </div>
+                          <h3 className="mb-1 text-lg font-semibold">{dish.name}</h3>
+                          {dish.price && (
+                            <p className="mb-2 text-lg font-semibold text-gray-900">{dish.price}</p>
+                          )}
+                          {dish.description && (
+                            <p className="mb-2 text-sm text-gray-600 line-clamp-3">
+                              {dish.description}
+                            </p>
+                          )}
+                        </div>
+                        {dish.image && (
+                          <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full">
+                            <img
+                              src={dish.image}
+                              alt={dish.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        )}
                       </div>
-                      <h3 className="text-lg font-semibold">{dish.name}</h3>
-                      {dish.price && (
-                        <p className="mb-2 text-lg font-semibold text-gray-900">{dish.price}</p>
-                      )}
-                      {dish.description && (
-                        <p className="mb-2 text-sm text-gray-600 line-clamp-3">
-                          {dish.description}
-                        </p>
-                      )}
-                    </div>
-                    {dish.image && (
-                      <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full">
-                        <img
-                          src={dish.image}
-                          alt={dish.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    )}
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </div>
@@ -198,10 +222,10 @@ export default function MenuPage() {
       <Dialog open={isMenuDialogOpen} onOpenChange={setIsMenuDialogOpen}>
         <DialogTrigger asChild>
           <Button
-            className="fixed bottom-6 right-6 z-50 h-14 rounded-full bg-pink-500 px-6 text-white shadow-lg hover:bg-pink-600"
+            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 h-14 rounded-full bg-pink-500 px-8 text-white shadow-lg hover:bg-pink-600"
             size="lg"
           >
-            <span className="mr-2">☰</span>
+            <span className="mr-2 text-xl">≡</span>
             Menu
           </Button>
         </DialogTrigger>
@@ -210,28 +234,35 @@ export default function MenuPage() {
             <DialogTitle>Menu Categories</DialogTitle>
             <DialogDescription>Select a category to navigate</DialogDescription>
           </DialogHeader>
-          <div className="space-y-2">
+          <div className="space-y-4">
             {allCategories.map((category) => {
               const dishCount = dishesByCategory.get(category.id)?.length ?? 0;
               return (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between border-b pb-2"
+                  className="border-b pb-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+                  onClick={() => {
+                    scrollToCategory(category.id);
+                    setIsMenuDialogOpen(false);
+                  }}
                 >
-                  <div>
-                    <p className="font-semibold">{category.name}</p>
-                    <p className="text-sm text-gray-500">{dishCount} items</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold text-lg text-gray-900">{category.name}</p>
+                      <p className="text-sm text-gray-500 mt-1">{dishCount} items</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        scrollToCategory(category.id);
+                        setIsMenuDialogOpen(false);
+                      }}
+                    >
+                      View
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      scrollToCategory(category.id);
-                      setIsMenuDialogOpen(false);
-                    }}
-                  >
-                    View
-                  </Button>
                 </div>
               );
             })}
