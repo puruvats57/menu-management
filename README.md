@@ -205,6 +205,3 @@ AI was used for targeted assistance on specific implementation details:
      - Local storage for menu data
      - Offline-first architecture
 
-## License
-
-MIT
