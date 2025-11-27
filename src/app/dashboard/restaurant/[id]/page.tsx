@@ -1,8 +1,8 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState } from "react";
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
@@ -12,6 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import Link from "next/link";
+
+type Restaurant = RouterOutputs["restaurant"]["getById"];
+type Dish = NonNullable<Restaurant>["dishes"][number];
+type DishCategory = Dish["categories"][number];
 
 export default function RestaurantManagementPage() {
   const params = useParams();
@@ -55,7 +59,7 @@ export default function RestaurantManagementPage() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [isDishDialogOpen, setIsDishDialogOpen] = useState(false);
-  const [editingDish, setEditingDish] = useState<any>(null);
+  const [editingDish, setEditingDish] = useState<Dish | null>(null);
 
   const [dishForm, setDishForm] = useState({
     name: "",
@@ -144,7 +148,7 @@ export default function RestaurantManagementPage() {
     }
   };
 
-  const openEditDishDialog = (dish: any) => {
+  const openEditDishDialog = (dish: Dish) => {
     setEditingDish(dish);
     setDishForm({
       name: dish.name,
@@ -152,7 +156,7 @@ export default function RestaurantManagementPage() {
       image: dish.image ?? "",
       spiceLevel: dish.spiceLevel ?? undefined,
       price: dish.price ?? "",
-      categoryIds: dish.categories.map((c: any) => c.categoryId || c.id),
+      categoryIds: dish.categories.map((c) => c.categoryId),
     });
     setImagePreview(dish.image ?? null);
     setIsDishDialogOpen(true);
@@ -263,7 +267,7 @@ export default function RestaurantManagementPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {restaurant.categories.map((category) => {
                 const categoryDishes = restaurant.dishes.filter((dish) =>
-                  dish.categories.some((dc: any) => dc.categoryId === category.id || dc.category?.id === category.id)
+                  dish.categories.some((dc) => dc.categoryId === category.id)
                 );
                 return (
                   <Card key={category.id}>
@@ -487,10 +491,10 @@ export default function RestaurantManagementPage() {
                         <div className="mb-2">
                           <p className="text-xs text-gray-500">Categories:</p>
                           <div className="mt-1 flex flex-wrap gap-1">
-                            {dish.categories.map((dc: any) => {
-                              const category = dc.category || restaurant.categories.find((c) => c.id === dc.categoryId);
+                            {dish.categories.map((dc) => {
+                              const category = restaurant.categories.find((c) => c.id === dc.categoryId);
                               return category ? (
-                                <span key={dc.id || category.id} className="rounded bg-gray-100 px-2 py-1 text-xs">
+                                <span key={dc.id} className="rounded bg-gray-100 px-2 py-1 text-xs">
                                   {category.name}
                                 </span>
                               ) : null;
