@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -15,7 +16,7 @@ export default function MenuPage() {
   const [currentCategoryName, setCurrentCategoryName] = useState<string>("");
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
-  const categoryRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const { data: menu } = api.public.getMenu.useQuery(
     { restaurantId },
@@ -98,7 +99,6 @@ export default function MenuPage() {
 
   // Get all unique categories from all dishes
   const allCategories = menu.categories;
-  const categoryMap = new Map(allCategories.map((cat) => [cat.id, cat]));
 
   // Group dishes by category for display
   const dishesByCategory = new Map<string, typeof menu.allDishes>();
@@ -201,9 +201,11 @@ export default function MenuPage() {
                         </div>
                         {dish.image && (
                           <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-full">
-                            <img
+                            <Image
                               src={dish.image}
                               alt={dish.name}
+                              width={96}
+                              height={96}
                               className="h-full w-full object-cover"
                             />
                           </div>
@@ -271,14 +273,17 @@ export default function MenuPage() {
             <div className="mt-6 border-t pt-6">
               <p className="mb-4 text-center font-semibold">Share Menu</p>
               <div className="flex flex-col items-center gap-4">
-                <img src={qrCodeUrl} alt="QR Code" className="h-48 w-48" />
+                <Image src={qrCodeUrl} alt="QR Code" width={192} height={192} className="h-48 w-48" unoptimized />
                 <Button
                   variant="outline"
                   onClick={() => {
-                    navigator.clipboard.writeText(
+                    void navigator.clipboard.writeText(
                       `http://192.168.1.24:3000/menu/${restaurantId}`
-                    );
-                    alert("Link copied to clipboard!");
+                    ).then(() => {
+                      alert("Link copied to clipboard!");
+                    }).catch((err) => {
+                      console.error("Failed to copy link:", err);
+                    });
                   }}
                 >
                   Copy Link
