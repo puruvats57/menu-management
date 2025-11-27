@@ -31,7 +31,9 @@ npm run db:push
 npm run dev
 ```
 
+## ## Vercel deployed Link
 
+https://menu-management-olive.vercel.app/
 
 ## Development Approach & Tools
 
