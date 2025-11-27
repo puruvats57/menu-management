@@ -12,11 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import Link from "next/link";
-import Image from "next/image";
 
 export default function RestaurantManagementPage() {
   const params = useParams();
-  const router = useRouter();
   const restaurantId = params.id as string;
 
   const { data: restaurant, refetch: refetchRestaurant } = api.restaurant.getById.useQuery(
@@ -26,31 +24,31 @@ export default function RestaurantManagementPage() {
 
   const createCategory = api.menu.createCategory.useMutation({
     onSuccess: () => {
-      refetchRestaurant();
+      void refetchRestaurant();
     },
   });
 
   const createDish = api.menu.createDish.useMutation({
     onSuccess: () => {
-      refetchRestaurant();
+      void refetchRestaurant();
     },
   });
 
   const updateDish = api.menu.updateDish.useMutation({
     onSuccess: () => {
-      refetchRestaurant();
+      void refetchRestaurant();
     },
   });
 
   const deleteDish = api.menu.deleteDish.useMutation({
     onSuccess: () => {
-      refetchRestaurant();
+      void refetchRestaurant();
     },
   });
 
   const deleteCategory = api.menu.deleteCategory.useMutation({
     onSuccess: () => {
-      refetchRestaurant();
+      void refetchRestaurant();
     },
   });
 
