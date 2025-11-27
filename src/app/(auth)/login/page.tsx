@@ -12,7 +12,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [step, setStep] = useState<"email" | "verify" | "register">("email");
+  const [step, setStep] = useState<"email" | "verify" | "register">("register");
   const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState("");
 
@@ -97,13 +97,21 @@ export default function LoginPage() {
             >
               {register.isPending ? "Sending..." : "Send Verification Code"}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setStep("email")}
-              className="w-full"
-            >
-              Back to Login
-            </Button>
+            <div className="pt-4 text-center">
+              <p className="text-sm text-gray-600 mb-2">Already have an account?</p>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setStep("email");
+                  setEmail("");
+                  setFullName("");
+                  setCountry("");
+                }}
+                className="w-full"
+              >
+                Login
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -182,6 +190,20 @@ export default function LoginPage() {
           >
             {sendCode.isPending ? "Sending..." : "Send Verification Code"}
           </Button>
+          <div className="pt-4 text-center">
+            <p className="text-sm text-gray-600 mb-2">Don't have an account?</p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setStep("register");
+                setEmail("");
+                setCode("");
+              }}
+              className="w-full"
+            >
+              Register
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
