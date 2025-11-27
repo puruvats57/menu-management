@@ -34,7 +34,8 @@ export default function MenuPage() {
   useEffect(() => {
     // Generate QR code
     if (typeof window !== "undefined" && restaurantId) {
-      const menuUrl = `http://192.168.1.24:3000/menu/${restaurantId}`;
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
+      const menuUrl = `${baseUrl}/menu/${restaurantId}`;
       QRCode.toDataURL(menuUrl)
         .then((url) => {
           setQrCodeUrl(url);
@@ -277,8 +278,9 @@ export default function MenuPage() {
                 <Button
                   variant="outline"
                   onClick={() => {
+                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
                     void navigator.clipboard.writeText(
-                      `http://192.168.1.24:3000/menu/${restaurantId}`
+                      `${baseUrl}/menu/${restaurantId}`
                     ).then(() => {
                       alert("Link copied to clipboard!");
                     }).catch((err) => {
