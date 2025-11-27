@@ -191,7 +191,7 @@ export default function LoginPage() {
             {sendCode.isPending ? "Sending..." : "Send Verification Code"}
           </Button>
           <div className="pt-4 text-center">
-            <p className="text-sm text-gray-600 mb-2">Don't have an account?</p>
+            <p className="text-sm text-gray-600 mb-2">Don&apos;t have an account?</p>
             <Button
               variant="outline"
               onClick={() => {
