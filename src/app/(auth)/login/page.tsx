@@ -12,7 +12,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [step, setStep] = useState<"email" | "verify">("email");
+  const [step, setStep] = useState<"email" | "verify" | "register">("email");
   const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState("");
 
