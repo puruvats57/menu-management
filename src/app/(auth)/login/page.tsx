@@ -170,7 +170,7 @@ export default function LoginPage() {
               placeholder="your@email.com"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleSendCode();
+                  void handleSendCode();
                 }
               }}
             />
